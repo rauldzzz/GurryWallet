@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/demo_mayor_test.dir/demo_mayor_test.cc.o -o demo_mayor_test  libmdoc.a /usr/lib/x86_64-linux-gnu/libgtest_main.a -lcrypto -lzstd /usr/lib/x86_64-linux-gnu/libgtest.a 

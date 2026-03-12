@@ -1,0 +1,5 @@
+if(EXISTS "/mnt/c/Users/rauld/Documents/4o+TFG/longfellow-zk/lib/build/circuits/mdoc/mdoc_signature_test[1]_tests.cmake")
+  include("/mnt/c/Users/rauld/Documents/4o+TFG/longfellow-zk/lib/build/circuits/mdoc/mdoc_signature_test[1]_tests.cmake")
+else()
+  add_test(mdoc_signature_test_NOT_BUILT mdoc_signature_test_NOT_BUILT)
+endif()

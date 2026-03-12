@@ -1,0 +1,5 @@
+if(EXISTS "/mnt/c/Users/rauld/Documents/4o+TFG/longfellow-zk/lib/circuits/base64/decode_test[1]_tests.cmake")
+  include("/mnt/c/Users/rauld/Documents/4o+TFG/longfellow-zk/lib/circuits/base64/decode_test[1]_tests.cmake")
+else()
+  add_test(decode_test_NOT_BUILT decode_test_NOT_BUILT)
+endif()

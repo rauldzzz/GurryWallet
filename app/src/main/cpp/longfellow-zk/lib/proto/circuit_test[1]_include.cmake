@@ -1,0 +1,5 @@
+if(EXISTS "/mnt/c/Users/rauld/Documents/4o+TFG/longfellow-zk/lib/proto/circuit_test[1]_tests.cmake")
+  include("/mnt/c/Users/rauld/Documents/4o+TFG/longfellow-zk/lib/proto/circuit_test[1]_tests.cmake")
+else()
+  add_test(circuit_test_NOT_BUILT circuit_test_NOT_BUILT)
+endif()

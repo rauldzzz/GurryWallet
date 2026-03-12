@@ -1,0 +1,5 @@
+if(EXISTS "/mnt/c/Users/rauld/Documents/4o+TFG/longfellow-zk/lib/build/algebra/rfft_test[1]_tests.cmake")
+  include("/mnt/c/Users/rauld/Documents/4o+TFG/longfellow-zk/lib/build/algebra/rfft_test[1]_tests.cmake")
+else()
+  add_test(rfft_test_NOT_BUILT rfft_test_NOT_BUILT)
+endif()

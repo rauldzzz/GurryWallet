@@ -1,0 +1,5 @@
+if(EXISTS "/mnt/c/Users/rauld/Documents/4o+TFG/longfellow-zk/lib/circuits/logic/bit_plucker_test[1]_tests.cmake")
+  include("/mnt/c/Users/rauld/Documents/4o+TFG/longfellow-zk/lib/circuits/logic/bit_plucker_test[1]_tests.cmake")
+else()
+  add_test(bit_plucker_test_NOT_BUILT bit_plucker_test_NOT_BUILT)
+endif()

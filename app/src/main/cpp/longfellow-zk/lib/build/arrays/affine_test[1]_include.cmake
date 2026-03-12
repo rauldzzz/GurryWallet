@@ -1,0 +1,5 @@
+if(EXISTS "/mnt/c/Users/rauld/Documents/4o+TFG/longfellow-zk/lib/build/arrays/affine_test[1]_tests.cmake")
+  include("/mnt/c/Users/rauld/Documents/4o+TFG/longfellow-zk/lib/build/arrays/affine_test[1]_tests.cmake")
+else()
+  add_test(affine_test_NOT_BUILT affine_test_NOT_BUILT)
+endif()

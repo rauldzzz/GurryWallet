@@ -1,0 +1,5 @@
+if(EXISTS "/mnt/c/Users/rauld/Documents/4o+TFG/longfellow-zk/lib/random/random_test[1]_tests.cmake")
+  include("/mnt/c/Users/rauld/Documents/4o+TFG/longfellow-zk/lib/random/random_test[1]_tests.cmake")
+else()
+  add_test(random_test_NOT_BUILT random_test_NOT_BUILT)
+endif()

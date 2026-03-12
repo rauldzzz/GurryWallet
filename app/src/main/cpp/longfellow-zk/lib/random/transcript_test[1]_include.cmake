@@ -1,0 +1,5 @@
+if(EXISTS "/mnt/c/Users/rauld/Documents/4o+TFG/longfellow-zk/lib/random/transcript_test[1]_tests.cmake")
+  include("/mnt/c/Users/rauld/Documents/4o+TFG/longfellow-zk/lib/random/transcript_test[1]_tests.cmake")
+else()
+  add_test(transcript_test_NOT_BUILT transcript_test_NOT_BUILT)
+endif()

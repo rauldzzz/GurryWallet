@@ -1,0 +1,5 @@
+if(EXISTS "/mnt/c/Users/rauld/Documents/4o+TFG/longfellow-zk/lib/build/circuits/logic/logic_test[1]_tests.cmake")
+  include("/mnt/c/Users/rauld/Documents/4o+TFG/longfellow-zk/lib/build/circuits/logic/logic_test[1]_tests.cmake")
+else()
+  add_test(logic_test_NOT_BUILT logic_test_NOT_BUILT)
+endif()

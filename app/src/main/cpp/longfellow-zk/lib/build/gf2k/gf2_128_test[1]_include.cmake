@@ -1,0 +1,5 @@
+if(EXISTS "/mnt/c/Users/rauld/Documents/4o+TFG/longfellow-zk/lib/build/gf2k/gf2_128_test[1]_tests.cmake")
+  include("/mnt/c/Users/rauld/Documents/4o+TFG/longfellow-zk/lib/build/gf2k/gf2_128_test[1]_tests.cmake")
+else()
+  add_test(gf2_128_test_NOT_BUILT gf2_128_test_NOT_BUILT)
+endif()

@@ -1,0 +1,5 @@
+if(EXISTS "/mnt/c/Users/rauld/Documents/4o+TFG/longfellow-zk/lib/build/algebra/crt_test[1]_tests.cmake")
+  include("/mnt/c/Users/rauld/Documents/4o+TFG/longfellow-zk/lib/build/algebra/crt_test[1]_tests.cmake")
+else()
+  add_test(crt_test_NOT_BUILT crt_test_NOT_BUILT)
+endif()

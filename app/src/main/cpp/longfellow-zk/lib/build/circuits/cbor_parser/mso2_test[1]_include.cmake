@@ -1,0 +1,5 @@
+if(EXISTS "/mnt/c/Users/rauld/Documents/4o+TFG/longfellow-zk/lib/build/circuits/cbor_parser/mso2_test[1]_tests.cmake")
+  include("/mnt/c/Users/rauld/Documents/4o+TFG/longfellow-zk/lib/build/circuits/cbor_parser/mso2_test[1]_tests.cmake")
+else()
+  add_test(mso2_test_NOT_BUILT mso2_test_NOT_BUILT)
+endif()
