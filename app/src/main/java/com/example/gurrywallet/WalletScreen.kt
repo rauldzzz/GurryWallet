@@ -78,9 +78,9 @@ fun WalletContent(
                         val exito = onRunCredential(1)
                         isLoading = false
                         if (exito) {
-                            Log.i("ZkTest", "✅ ÉXITO. El circuito validó a Raúl.")
+                            Log.i("ZkTest", "❌ ERROR inesperado en Lucas que dio que es mayor.")
                         } else {
-                            Log.e("ZkTest", "❌ ERROR inesperado en Raúl.")
+                            Log.e("ZkTest", "✅ ÉXITO. El circuito validó que Lucas es menor.")
                         }
                     }
                 }) {
