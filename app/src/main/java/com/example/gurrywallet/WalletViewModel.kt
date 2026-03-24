@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class WalletViewModel : ViewModel() {
+class WalletViewModel(repository: GurryWalletRepository) : ViewModel() {
 
     init {
         System.loadLibrary("gurry_native")
