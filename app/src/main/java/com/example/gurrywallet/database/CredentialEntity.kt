@@ -9,7 +9,7 @@ enum class TypeOfCredential {
 
 @Entity
 data class CredentialEntity(
-    @PrimaryKey(autoGenerate = true) val idCredencial: Int = -1,
+    @PrimaryKey(autoGenerate = true) val idCredencial: Int = 0,
     val userId: String = "",             // Para saber de qué usuario es
     val tipo: TypeOfCredential? = null,        // Enum (Room lo guarda como String o Int)
     val indexEnC: Int = -1,                 // El '0' o '1' que le pasarás a C++

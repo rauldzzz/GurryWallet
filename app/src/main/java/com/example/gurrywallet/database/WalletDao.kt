@@ -15,4 +15,8 @@ interface WalletDao {
     // Saca todas las credenciales de un usuario concreto
     @Query("SELECT * FROM CredentialEntity WHERE userId = :userId")
     suspend fun getCredencialesDeUsuario(userId: String): List<CredentialEntity>
+
+    //Obtain all Users
+    @Query("SELECT * FROM UserEntity")
+    suspend fun getAllUsers(): List<UserEntity>
 }
