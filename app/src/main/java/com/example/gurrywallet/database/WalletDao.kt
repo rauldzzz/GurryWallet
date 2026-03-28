@@ -3,6 +3,7 @@ package com.example.gurrywallet.database
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface WalletDao {
@@ -18,5 +19,5 @@ interface WalletDao {
 
     //Obtain all Users
     @Query("SELECT * FROM UserEntity")
-    suspend fun getAllUsers(): List<UserEntity>
+    fun getAllUsers(): Flow<List<UserEntity>>
 }
