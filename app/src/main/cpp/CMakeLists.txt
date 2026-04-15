@@ -53,7 +53,7 @@ list(FILTER LONGFELLOW_SRC EXCLUDE REGEX ".*circuit_maker\\.cc$")# Ignorar ejecu
 add_library(
         gurry_native
         SHARED
-        longfellow_jni.cpp
+        prover.cpp
         ${LONGFELLOW_SRC}
 )
 
