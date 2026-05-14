@@ -1,7 +1,10 @@
 package com.example.gurrywallet
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -25,7 +28,7 @@ class MainActivity : ComponentActivity() {
         }
         initializer {
             val app = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as GurryWalletApplication)
-            WalletViewModel(app.repository)
+            WalletViewModel(app.repository, app.cacheDir.absolutePath)
         }
     }
     private val settingsViewModel: SettingsViewModel by viewModels { appViewModelFactory }
@@ -38,7 +41,21 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     NavBar(
                         settingsViewModel,
-                        walletViewModel
+                        walletViewModel,
+                        onProofReady = { resultPair ->
+                            if (resultPair != null){
+                                Toast.makeText(this@MainActivity, "The proof has been sent correctly", Toast.LENGTH_SHORT).show()
+                                val resultIntent = Intent().apply {
+                                    putExtra("zk_proof", resultPair.first)
+                                    putExtra("zk_transcript", resultPair.second)
+                                }
+                                setResult(Activity.RESULT_OK, resultIntent)
+                                finish()
+                            } else{
+                                Toast.makeText(this@MainActivity, "Error generating proof", Toast.LENGTH_SHORT).show()
+                            }
+
+                        }
                     )
                 }
             }

@@ -60,7 +60,7 @@ endif()
 # --- Demo Mayor Test ---
 
 # 1. SOLO ponemos tu archivo .cc (los otros no existen, están en los .h)
-add_executable(demo_mayor_test ../../../../longfellow_jni.cpp)
+add_executable(demo_mayor_test ../../../../prover.cpp)
 
 # 2. Enlazamos solo con mdoc y GTest (quitamos mdoc_examples y mdoc_test_attributes)
 target_link_libraries(demo_mayor_test

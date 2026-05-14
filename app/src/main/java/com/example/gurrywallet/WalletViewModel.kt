@@ -19,11 +19,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class WalletViewModel(repository: GurryWalletRepository) : ViewModel() {
+class WalletViewModel(
+    repository: GurryWalletRepository,
+    private val cacheDir: String) : ViewModel()
+{
 
     val currentUser = repository.currentUser
     private val _credencials = MutableStateFlow<List<CredentialEntity>>(emptyList())
     val credenciales: StateFlow<List<CredentialEntity>> = _credencials.asStateFlow()
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     init {
         System.loadLibrary("gurry_native")
@@ -72,15 +78,22 @@ class WalletViewModel(repository: GurryWalletRepository) : ViewModel() {
     }
 
     // La función nativa JNI sigue siendo idéntica (external = native en Kotlin)
-    private external fun ejecutarPruebaZkNativa(indiceCredencial: Int): ByteArray?
+    private external fun ejecutarPruebaZkNativa(indiceCredencial: Int, cacheDir: String): Array<ByteArray>?
 
     // "suspend" significa que puede pausarse y ejecutarse en segundo plano
-    suspend fun generarPruebaEdad(indice: Int): ByteArray? {
-        // Enviar la carga de trabajo a los hilos IO (Background)
-        return withContext(Dispatchers.IO) {
-            // Esto tardará los 7-10 segundos de rigor
-            val proofBytes = ejecutarPruebaZkNativa(indice)
-            proofBytes
+    suspend fun generarPruebaEdad(indice: Int): Pair<ByteArray, ByteArray>? {
+        _isLoading.value = true
+        return try {
+            withContext(Dispatchers.IO) {
+                val result = ejecutarPruebaZkNativa(indice, cacheDir)
+                if (result != null && result.size == 2) {
+                    Pair(result[0], result[1])
+                } else {
+                    null
+                }
+            }
+        } finally {
+            _isLoading.value = false
         }
     }
 }
