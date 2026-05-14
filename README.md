@@ -83,8 +83,8 @@ GurryWallet es una **billetera digital de credenciales** que implementa un siste
                      │ (ZK Proof + Transcript)
                      ▼
 ┌─────────────────────────────────────────────────────────┐
-│              SERVIDOR DE VERIFICACIÓN GURRY             │
-│         (Verifica la prueba usando run_mdoc_verifier)   │
+│            GURRY (APP CLIENTE) - VERIFICADOR JNI        │
+│      (Verifica localmente con run_mdoc_verifier)        │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -197,7 +197,7 @@ JNI retorna: Array<ByteArray>[proof, transcript]
 │ PASO 6: Verificación (nota importante)                      │
 └─────────────────────────────────────────────────────────────┘
 
-En esta implementación la verificación no se realiza en un servidor remoto, sino en la propia aplicación cliente (por ejemplo, la app `Gurry`). Es decir, Gurry recibe `proof` + `transcript` desde `GurryWallet` y la verificación puede llevarse a cabo dentro de la app cliente llamando a las rutinas de verificación (por ejemplo `run_mdoc_verifier`) localmente.
+En esta implementación la verificación no se realiza en un servidor remoto, sino en la propia aplicación cliente (por ejemplo, la app `Gurry`). Es decir, Gurry recibe `proof` + `transcript` desde `GurryWallet` y ejecuta el verifier local por JNI (por ejemplo `run_mdoc_verifier`).
 
 Nota adicional: los "transcripts" usados para pruebas en este repositorio no se generan en tiempo de ejecución aquí. Los transcripts de ejemplo que se almacenan en `my_mock.h` (que representan los usuarios sobre los que se verifica la edad) se crean mediante el script `generate.py` ubicado en el proyecto `mdoc_generator`. Si necesitas regenerar esos transcripts, ejecuta `generate.py` en `mdoc_generator` y actualiza `my_mock.h` con los resultados.
 
@@ -341,7 +341,7 @@ Una sesión es un identificador único y reproducible que enlaza:
 ```
 Session Transcript = CBOR(
     client_id,          // "Aplicación Gurry"
-    server_id,          // "Servidor de Verificación"
+    verifier_id,        // "Verificador local en Gurry"
     session_id,         // UUID único de esta solicitud
     timestamp,          // Momento de la solicitud
     challenges[]        // Desafíos criptográficos
@@ -350,7 +350,7 @@ Session Transcript = CBOR(
 Ejemplo:
 {
   "client": "com.gurry.verifier",
-  "server": "gurry-verification-server",
+    "verifier": "com.gurry.app.localverifier",
   "session_id": "550e8400-e29b-41d4-a716-446655440000",
   "timestamp": "2025-05-13T14:30:00Z",
   "challenge": [0x12, 0x34, 0x56, ...]
@@ -425,7 +425,7 @@ Output:
 
 ### 3. **Verificación (run_mdoc_verifier)**
 
-El servidor recibe proof + transcript y:
+Gurry recibe `proof + transcript` por `Intent` y ejecuta la verificación local por JNI:
 
 ```
 Input:
@@ -524,38 +524,24 @@ override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) 
     if (requestCode == REQUEST_CODE_PROOF && resultCode == Activity.RESULT_OK) {
         val proof = data?.getByteArrayExtra("zk_proof")
         val transcript = data?.getByteArrayExtra("zk_transcript")
-        
-        // Envía al servidor para verificación
-        verifyProofOnServer(proof, transcript)
-    }
-}
 
-private fun verifyProofOnServer(proof: ByteArray, transcript: ByteArray) {
-    val request = JSONObject().apply {
-        put("ZKDeviceResponseCBOR", Base64.getEncoder().encodeToString(proof))
-        put("Transcript", Base64.getEncoder().encodeToString(transcript))
-    }
-    
-    // POST a servidor de verificación
-    val client = OkHttpClient()
-    val req = Request.Builder()
-        .url("https://gurry-server/zkverify")
-        .post(RequestBody.create("application/json".toMediaType(), request.toString()))
-        .build()
-    
-    client.newCall(req).enqueue(object : Callback {
-        override fun onFailure(call: Call, e: IOException) { /* Error */ }
-        
-        override fun onResponse(call: Call, response: Response) {
-            val responseJson = JSONObject(response.body?.string() ?: "{}")
-            if (responseJson.getBoolean("Status")) {
-                // Verificación exitosa
-                val claims = responseJson.getJSONObject("Claims")
+        if (proof != null && transcript != null) {
+            // Verificación local en Gurry vía JNI
+            val verification = verifyProofLocallyNative(proof, transcript)
+            if (verification.status) {
+                val claims = verification.claims
                 // Procesar claims verificados
             }
         }
-    })
+    }
 }
+
+data class VerificationResult(val status: Boolean, val claims: String)
+
+private external fun verifyProofLocallyNative(
+    proof: ByteArray,
+    transcript: ByteArray
+): VerificationResult
 ```
 
 ### Flujo Visual
@@ -583,10 +569,10 @@ private fun verifyProofOnServer(proof: ByteArray, transcript: ByteArray) {
          │
          ▼
 ┌──────────────────────────┐
-│   GURRY VERIFICATION     │
-│   SERVER (Backend)       │
-│  - Verify proof          │
-│  - Return claims         │
+│   GURRY (APP CLIENTE)    │
+│   Verificación local JNI │
+│  - run_mdoc_verifier     │
+│  - Obtiene claims        │
 └──────────────────────────┘
 ```
 
@@ -671,11 +657,7 @@ GurryWallet/
 │   │       │       │   └── (librerías auxiliares)
 │   │       │       └── reference/
 │   │       │           └── verifier-service/
-│   │       │               ├── server/
-│   │       │               │   ├── main.go         # Servidor verificación
-│   │       │               │   └── handler.go      # Endpoints HTTP
-│   │       │               └── v2/zk/
-│   │       │                   └── (lógica servidor)
+│   │       │               └── ...                 # Referencia upstream (no usada en el flujo de la app Gurry)
 │   │       ├── AndroidManifest.xml
 │   │       └── res/
 │   └── build.gradle.kts                            # Configuración Gradle
@@ -996,44 +978,23 @@ override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) 
     if (requestCode == REQUEST_CODE_ZK_PROOF && resultCode == Activity.RESULT_OK) {
         val proof = data?.getByteArrayExtra("zk_proof")
         val transcript = data?.getByteArrayExtra("zk_transcript")
-        
-        // Envía al servidor para verificación
-        verifyProof(proof, transcript)
+
+        // Ejecuta verificación local en Gurry por JNI
+        val verification = verifyProofLocallyNative(proof!!, transcript!!)
+        if (verification.status) {
+            // Claims verificados localmente
+        }
     }
 }
 
                     ▼
 
 ┌──────────────────────────────────────────────────────────┐
-│ SERVIDOR GURRY (Go): Verifica prueba con run_mdoc_verifier │
+│ JNI EN GURRY: Verifica prueba con run_mdoc_verifier     │
 └──────────────────────────────────────────────────────────┘
 
-// En verifier-service/server/handler.go
-func (s *Server) handleZKVerify(w http.ResponseWriter, r *http.Request) error {
-    var request ZKVerifyRequest
-    json.NewDecoder(r.Body).Decode(&request)
-    
-    // Procesa la respuesta CBOR del device
-    vreq, err := zk.ProcessDeviceResponse(request.ZKDeviceResponseCBOR)
-    vreq.Transcript = request.Transcript
-    
-    // Verifica la prueba
-    ok, err := zk.VerifyProofRequest(vreq)
-    
-    response := ZKVerifyResponse{
-        Status: ok,
-        Claims: vreq.Claims,
-    }
-    
-    if err != nil {
-        response.Message = err.Error()
-    }
-    
-    return writeJSON(w, http.StatusOK, response)
-}
-
-// En zk/verifier.go (C++ llamado desde Go)
-bool VerifyProofRequest(VerifyRequest* vreq) {
+// JNI/C++ invocado desde la app Gurry
+bool VerifyProofRequestLocally(VerifyRequest* vreq) {
     MdocVerifierErrorCode result = run_mdoc_verifier(
         circuit, circuit_len,
         issuer_pk_x, issuer_pk_y,
